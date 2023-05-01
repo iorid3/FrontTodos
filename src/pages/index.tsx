@@ -179,10 +179,9 @@ export default function Home() {
       const sortNewDoneTask = newDoneTasks
         .sort(
           (a: any, b: any) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
+            new Date(b.updated_date).getTime() - new Date(a.updated_date).getTime()
         )
         .slice(0, 10);
-
       setDoneTasks(sortNewDoneTask);
       await apiService.updateTask({
         id: updatedTask.id,
@@ -204,7 +203,7 @@ export default function Home() {
         .filter((todo: any) => todo.completion === true)
         .sort(
           (a: any, b: any) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
+            new Date(b.updated_date).getTime() - new Date(a.updated_date).getTime()
         )
         .slice(0, 10);
 
