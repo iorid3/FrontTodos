@@ -171,7 +171,12 @@ export default function Home() {
       );
       setTodoTasks(newTodoTasks);
       const newDoneTasks = [...doneTasks, updatedTask];
-      setDoneTasks(newDoneTasks.slice(0,10));
+      const sortNewDoneTask = newDoneTasks
+      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 10);
+
+      
+      setDoneTasks(sortNewDoneTask);
       await apiService.updateTask({
         id: updatedTask.id,
         completion: !updatedTask.completion,
