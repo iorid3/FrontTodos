@@ -156,7 +156,7 @@ export default function Home() {
     const updatedTask = response?.data.data[0];
     updatedTask.completion = !completion;
     
-    if (completion) {
+    if (!completion) {
       const newTodoTasks = [...todoTasks, updatedTask];
       setTodoTasks(newTodoTasks);
       await apiService.updateTask({
