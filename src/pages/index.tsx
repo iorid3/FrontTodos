@@ -31,7 +31,7 @@ const TopWrapper = styled.div({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
-  '@media (max-width: 768px)': {
+  "@media (max-width: 768px)": {
     height: "40vh",
     flexDirection: "column",
   },
@@ -51,7 +51,6 @@ const ButtomLeftWrapper = styled.div({
   height: "100%",
   alignItems: "center",
   justifyContent: "center",
-
 });
 
 const ButtomRightWrapper = styled.div({
@@ -59,7 +58,14 @@ const ButtomRightWrapper = styled.div({
   height: "100%",
   alignItems: "center",
   justifyContent: "center",
-  marging:10
+  marging: 10,
+});
+
+const DeleteButtonWrapper = styled.div({
+  width: "10%",
+  height: "10%",
+  alignItems: "center ",
+  justifyItems: "center",
 });
 
 export default function Home() {
@@ -84,19 +90,17 @@ export default function Home() {
   const handleCancel = () => {
     setdeleteConf(false);
   };
-  
+
   const handleConfirm = async () => {
     const response = await apiService.deleteAllTask("");
     setdeleteConf(false);
   };
 
-
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
     const newTask = { title: task };
     const response = await apiService.addTask(newTask);
-    console.log(response.data.data);
-    const addedTask: Todo = response.data.data[0];
+    const addedTask: Todo = response?.data.data[0];
     setTodoTasks([...todoTasks, addedTask]);
     setTask("");
   };
@@ -106,7 +110,7 @@ export default function Home() {
     const newText = { searchText: searchText };
     setSearchText(searchText);
     const response = await apiService.searchTask(newText);
-    const arrangedData = response.data.data;
+    const arrangedData = response?.data.data;
     setSearchResults(arrangedData);
 
     if (arrangedData.length > 0) {
@@ -148,7 +152,7 @@ export default function Home() {
       title,
       completion: !completion,
     });
-    const updatedTask = response.data.data[0];
+    const updatedTask = response?.data.data[0];
     updatedTask.completion = !completion;
     if (completion) {
       const newDoneTasks = doneTasks.filter(
@@ -167,7 +171,7 @@ export default function Home() {
       );
       setTodoTasks(newTodoTasks);
       const newDoneTasks = [...doneTasks, updatedTask];
-      setDoneTasks(newDoneTasks);
+      setDoneTasks(newDoneTasks.slice(0,10));
       await apiService.updateTask({
         id: updatedTask.id,
         completion: !updatedTask.completion,
@@ -178,15 +182,20 @@ export default function Home() {
   useEffect(() => {
     const fetchTasks = async () => {
       const response: AxiosResponse = await apiService.getAllTasks("");
-      const dataArray = response.data.data;
+      const dataArray = response?.data.data || [];
+
+
       const newTodoTasks = dataArray.filter(
         (todo: any) => todo.completion === false
       );
-      const newDoneTasks = dataArray.filter(
-        (todo: any) => todo.completion === true
-      );
+    
+      const newestDoneTasks = dataArray
+      .filter((todo: any) => todo.completion === true)
+      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 10);
+      
       setTodoTasks(newTodoTasks);
-      setDoneTasks(newDoneTasks);
+      setDoneTasks(newestDoneTasks);
     };
     fetchTasks();
   }, []);
@@ -218,60 +227,65 @@ export default function Home() {
               value={searchText}
               onChange={handleSearch}
             />
-
             {!deleteConf ? (
-              <Button onClick={handleDelete}>Delete All</Button>
+                <Button onClick={handleDelete}>Delete All</Button>
             ) : (
               <>
-                <h3>Are you sure</h3>
-                <Button onClick ={handleConfirm}>OK</Button>
-                <Button onClick = {handleCancel}>Cancel</Button>
+                  <h3>Are you sure</h3>
+                  <Button onClick={handleConfirm}>OK</Button>
+                  <Button onClick={handleCancel}>Cancel</Button>
               </>
             )}
           </TopWrapper>
 
           <ButtomWrapper>
-          <ButtomLeftWrapper>
-            <Box sx={{flexDirection:'column',justifyContent:"center", alignItems:"center"}}>
-              <h2>Todo</h2>
-              {todoTasks.length > 0 ? (
-                todoTasks.map((task) => (
-                  <TaskCard
-                    key={task.id + "todo"}
-                    id={"card" + task.id}
-                    title={task.title}
-                    completion={task.completion}
-                    onToggle={() =>
-                      handleToggle(task.id, task.title, task.completion)
-                    }
-                    className={"todo" + task.id}
-                  />
-                ))
-              ) : (
-                <div>No tasks</div>
-              )}
-            </Box>
+            <ButtomLeftWrapper>
+              <Box
+                sx={{
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <h2>Todo</h2>
+                {todoTasks.length > 0 ? (
+                  todoTasks.map((task) => (
+                    <TaskCard
+                      key={task.id + "todo"}
+                      id={"card" + task.id}
+                      title={task.title}
+                      completion={task.completion}
+                      onToggle={() =>
+                        handleToggle(task.id, task.title, task.completion)
+                      }
+                      className={"todo" + task.id}
+                    />
+                  ))
+                ) : (
+                  <div>No tasks</div>
+                )}
+              </Box>
             </ButtomLeftWrapper>
             <ButtomRightWrapper>
-            <Box sx={{ maxWidth:800,maxHeight:800}}>
-              <h2>Done</h2>
-              {doneTasks.length > 0 ? (
-                doneTasks.map((task) => (
-                  <TaskCard
-                    key={task.id + "done"}
-                    id={"card" + task.id}
-                    title={task.title}
-                    completion={task.completion}
-                    onToggle={() =>
-                      handleToggle(task.id, task.title, task.completion)
-                    }
-                  />
-                ))
-              ) : (
-                <div>No done tasks</div>
-              )}
-            </Box>
-            </ButtomRightWrapper>  
+              <Box sx={{ maxWidth: 800, maxHeight: 800 }}>
+                <h2>Done</h2>
+                {doneTasks.length > 0 ? (
+                  doneTasks.map((task) => (
+                    <TaskCard
+                      key={task.id + "done"}
+                      id={"card" + task.id}
+                      title={task.title}
+                      completion={task.completion}
+                      onToggle={() =>
+                        handleToggle(task.id, task.title, task.completion)
+                      }
+                    />
+                  ))
+                ) : (
+                  <div>No done tasks</div>
+                )}
+              </Box>
+            </ButtomRightWrapper>
           </ButtomWrapper>
         </Container>
       </>
