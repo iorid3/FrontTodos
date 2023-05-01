@@ -155,59 +155,54 @@ export default function Home() {
     });
     const updatedTask = response?.data.data[0];
     updatedTask.completion = !completion;
+  
     if (completion) {
       const newTodoTasks = [...todoTasks, updatedTask];
       setTodoTasks(newTodoTasks);
-      await apiService.updateTask({
-        id: updatedTask.id,
-        completion: !updatedTask.completion,
-      });
-
-      const newDoneTasks = doneTasks.filter(
-        (task) => task.id !== id.toString()
-      );
-      // .sort(
-      //   (a: any, b: any) =>
-      //     new Date(b.date).getTime() - new Date(a.date).getTime()
-      // )
-      // .slice(0, 10);
-      if (newDoneTasks.length <= 10) {
-        setDoneTasks(newDoneTasks);
+  
+      const newDoneTasks = doneTasks
+        .filter((task) => task.id !== id.toString())
+        .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 10);
+  
+      const removedTask = doneTasks.find((task) => task.id === id.toString());
+      if (removedTask && extraDoneTasks.length > 0) {
+        const newExtraDoneTasks = extraDoneTasks.filter((task) => task.id !== removedTask.id);
+        setExtraDoneTasks(newExtraDoneTasks);
+  
+        if (newDoneTasks.length >= 10) {
+          const [firstExtraTask, ...restExtraTasks] = extraDoneTasks;
+          const newDoneTasksWithExtraTask = [...newDoneTasks, firstExtraTask].sort(
+            (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+          setDoneTasks(newDoneTasksWithExtraTask);
+          setExtraDoneTasks(restExtraTasks);
+        }
       } else {
-        const latestDoneTasks = newDoneTasks.slice(0, 10);
-        const extraDoneTasks = newDoneTasks.slice(10);
-        setDoneTasks(latestDoneTasks);
-        setExtraDoneTasks(extraDoneTasks);
+        setDoneTasks(newDoneTasks);
       }
     } else {
-      const newTodoTasks = todoTasks.filter(
-        (task) => task.id !== id.toString()
-      );
+      const newTodoTasks = todoTasks.filter((task) => task.id !== id.toString());
       setTodoTasks(newTodoTasks);
-      const newDoneTasks = [...doneTasks, updatedTask];
-      const sortNewDoneTask = newDoneTasks
-        .sort(
-          (a: any, b: any) =>
-            new Date(b.updated_date).getTime() -
-            new Date(a.updated_date).getTime()
-        )
-        .slice(0, 10);
-      if (sortNewDoneTask.length < 10) {
-        setDoneTasks(sortNewDoneTask);
-        setExtraDoneTasks([]);
+  
+      const newDoneTasks = [...doneTasks, updatedTask].sort(
+        (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      if (newDoneTasks.length > 10) {
+        const [firstExtraTask, ...restExtraTasks] = newDoneTasks.slice(10);
+        setExtraDoneTasks([...extraDoneTasks, firstExtraTask]);
+        setDoneTasks(newDoneTasks.slice(0, 10));
       } else {
-        const latestDoneTasks = sortNewDoneTask.slice(0, 10);
-        const extraDoneTasks = sortNewDoneTask.slice(10);
-        setDoneTasks(latestDoneTasks);
-        setExtraDoneTasks(extraDoneTasks);
+        setDoneTasks(newDoneTasks);
       }
-      setDoneTasks(sortNewDoneTask);
-      await apiService.updateTask({
-        id: updatedTask.id,
-        completion: !updatedTask.completion,
-      });
     }
+  
+    await apiService.updateTask({
+      id: updatedTask.id,
+      completion: !updatedTask.completion,
+    });
   };
+  
 
   useEffect(() => {
     const fetchTasks = async () => {
