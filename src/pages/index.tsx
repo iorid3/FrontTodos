@@ -169,10 +169,6 @@ export default function Home() {
       );
       if (newDoneTasks.length < 10) {
         setDoneTasks(newDoneTasks);
-        const movedTask = extraDoneTasks.shift();
-        if (movedTask) {
-          setDoneTasks((prevDoneTasks) => [...prevDoneTasks, movedTask]);
-        }
       } else {
         const latestDoneTasks = newDoneTasks.slice(0, 10);
         const extraDoneTasks = newDoneTasks.slice(10);
@@ -192,17 +188,11 @@ export default function Home() {
             new Date(a.updated_date).getTime()
         )
         .slice(0, 10);
-      if (sortNewDoneTask.length < 10) {
-        setDoneTasks(sortNewDoneTask);
-        const movedTask = extraDoneTasks.shift();
-        if (movedTask) {
-          setDoneTasks((prevDoneTasks) => [...prevDoneTasks, movedTask]);
-        }
+      if (sortNewDoneTask.length < 10 && extraDoneTasks.length >0) {
+        const addingExtratasks = [...sortNewDoneTask,extraDoneTasks]
+        setDoneTasks(addingExtratasks)
       } else {
-        const latestDoneTasks = sortNewDoneTask.slice(0, 10);
-        const extraDoneTasks = sortNewDoneTask.slice(10);
-        setDoneTasks(latestDoneTasks);
-        setExtraDoneTasks(extraDoneTasks);
+        setDoneTasks(sortNewDoneTask);
       }
       await apiService.updateTask({
         id: updatedTask.id,
