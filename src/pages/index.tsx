@@ -155,20 +155,21 @@ export default function Home() {
     const updatedTask = response?.data.data[0];
     updatedTask.completion = !completion;
     if (completion) {
-      const newDoneTasks = doneTasks
-        .filter((task) => task.id !== id.toString())
-        .sort(
-          (a: any, b: any) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-        )
-        .slice(0, 10);
-      setDoneTasks(newDoneTasks);
       const newTodoTasks = [...todoTasks, updatedTask];
       setTodoTasks(newTodoTasks);
       await apiService.updateTask({
         id: updatedTask.id,
         completion: !updatedTask.completion,
       });
+
+      const newDoneTasks = doneTasks
+      .filter((task) => task.id !== id.toString())
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+      )
+      .slice(0, 10);
+    setDoneTasks(newDoneTasks);
     } else {
       const newTodoTasks = todoTasks.filter(
         (task) => task.id !== id.toString()
