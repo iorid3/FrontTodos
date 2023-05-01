@@ -155,9 +155,13 @@ export default function Home() {
     const updatedTask = response?.data.data[0];
     updatedTask.completion = !completion;
     if (completion) {
-      const newDoneTasks = doneTasks.filter(
-        (task) => task.id !== id.toString()
-      );
+      const newDoneTasks = doneTasks
+        .filter((task) => task.id !== id.toString())
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        .slice(0, 10);
       setDoneTasks(newDoneTasks);
       const newTodoTasks = [...todoTasks, updatedTask];
       setTodoTasks(newTodoTasks);
@@ -172,10 +176,12 @@ export default function Home() {
       setTodoTasks(newTodoTasks);
       const newDoneTasks = [...doneTasks, updatedTask];
       const sortNewDoneTask = newDoneTasks
-      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10);
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        .slice(0, 10);
 
-      
       setDoneTasks(sortNewDoneTask);
       await apiService.updateTask({
         id: updatedTask.id,
@@ -189,16 +195,18 @@ export default function Home() {
       const response: AxiosResponse = await apiService.getAllTasks("");
       const dataArray = response?.data.data || [];
 
-
       const newTodoTasks = dataArray.filter(
         (todo: any) => todo.completion === false
       );
-    
+
       const newestDoneTasks = dataArray
-      .filter((todo: any) => todo.completion === true)
-      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10);
-      
+        .filter((todo: any) => todo.completion === true)
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        .slice(0, 10);
+
       setTodoTasks(newTodoTasks);
       setDoneTasks(newestDoneTasks);
     };
@@ -233,12 +241,12 @@ export default function Home() {
               onChange={handleSearch}
             />
             {!deleteConf ? (
-                <Button onClick={handleDelete}>Delete All</Button>
+              <Button onClick={handleDelete}>Delete All</Button>
             ) : (
               <>
-                  <h3>Are you sure</h3>
-                  <Button onClick={handleConfirm}>OK</Button>
-                  <Button onClick={handleCancel}>Cancel</Button>
+                <h3>Are you sure</h3>
+                <Button onClick={handleConfirm}>OK</Button>
+                <Button onClick={handleCancel}>Cancel</Button>
               </>
             )}
           </TopWrapper>
