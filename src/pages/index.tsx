@@ -154,18 +154,6 @@ export default function Home() {
     });
     const updatedTask = response?.data.data[0];
     updatedTask.completion = !completion;
-   const handleToggle = async (
-    id: string,
-    title: string,
-    completion: boolean | undefined
-  ) => {
-    const response: AxiosResponse = await apiService.updateTask({
-      id,
-      title,
-      completion: !completion,
-    });
-    const updatedTask = response?.data.data[0];
-    updatedTask.completion = !completion;
     if (completion) {
       const newTodoTasks = [...todoTasks, updatedTask];
       setTodoTasks(newTodoTasks);
@@ -201,7 +189,6 @@ export default function Home() {
         completion: !updatedTask.completion,
       });
     }
-  };
   };
 
   useEffect(() => {
