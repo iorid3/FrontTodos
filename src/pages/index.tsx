@@ -71,6 +71,7 @@ const DeleteButtonWrapper = styled.div({
 export default function Home() {
   const [todoTasks, setTodoTasks] = useState<Todo[]>([]);
   const [doneTasks, setDoneTasks] = useState<Todo[]>([]);
+  const [extraDoneTasks, setExtraDoneTasks] = useState<Todo[]>([]);
   const [searchText, setSearchText] = useState("");
   const [deleteConf, setdeleteConf] = useState<Boolean>(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -162,14 +163,22 @@ export default function Home() {
         completion: !updatedTask.completion,
       });
 
-      const newDoneTasks = doneTasks
-      .filter((task) => task.id !== id.toString())
-      .sort(
-        (a: any, b: any) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-      )
-      .slice(0, 10);
-    setDoneTasks(newDoneTasks);
+      const newDoneTasks = doneTasks.filter(
+        (task) => task.id !== id.toString()
+      );
+      // .sort(
+      //   (a: any, b: any) =>
+      //     new Date(b.date).getTime() - new Date(a.date).getTime()
+      // )
+      // .slice(0, 10);
+      if (newDoneTasks.length <= 10) {
+        setDoneTasks(newDoneTasks);
+      } else {
+        const latestDoneTasks = newDoneTasks.slice(0, 10);
+        const extraDoneTasks = newDoneTasks.slice(10);
+        setDoneTasks(latestDoneTasks);
+        setExtraDoneTasks(extraDoneTasks);
+      }
     } else {
       const newTodoTasks = todoTasks.filter(
         (task) => task.id !== id.toString()
@@ -179,9 +188,19 @@ export default function Home() {
       const sortNewDoneTask = newDoneTasks
         .sort(
           (a: any, b: any) =>
-            new Date(b.updated_date).getTime() - new Date(a.updated_date).getTime()
+            new Date(b.updated_date).getTime() -
+            new Date(a.updated_date).getTime()
         )
         .slice(0, 10);
+      if (sortNewDoneTask.length < 10) {
+        setDoneTasks(sortNewDoneTask);
+        setExtraDoneTasks([]);
+      } else {
+        const latestDoneTasks = sortNewDoneTask.slice(0, 10);
+        const extraDoneTasks = sortNewDoneTask.slice(10);
+        setDoneTasks(latestDoneTasks);
+        setExtraDoneTasks(extraDoneTasks);
+      }
       setDoneTasks(sortNewDoneTask);
       await apiService.updateTask({
         id: updatedTask.id,
@@ -203,7 +222,8 @@ export default function Home() {
         .filter((todo: any) => todo.completion === true)
         .sort(
           (a: any, b: any) =>
-            new Date(b.updated_date).getTime() - new Date(a.updated_date).getTime()
+            new Date(b.updated_date).getTime() -
+            new Date(a.updated_date).getTime()
         )
         .slice(0, 10);
 
